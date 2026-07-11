@@ -1,0 +1,2 @@
+pydantic_ai==1.85.0
+pytz==2026.2

@@ -1,0 +1,52 @@
+
+
+services:
+
+  ollama:
+    image: ollama/ollama:latest
+    platform: linux/amd64
+    container_name: home-ollama
+    gpus: all
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+      - ./ollama/Modelfile:/app/Modelfile
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        set -e
+        echo "Starting Ollama..."
+        ollama serve &
+        OLLAMA_PID=$$!
+
+        until ollama list >/dev/null 2>&1; do
+            sleep 1
+        done
+
+        if ! ollama list | grep -q "^home-model"; then
+            ollama create home-model -f /app/Modelfile
+        fi
+
+        ollama list
+
+        wait $$OLLAMA_PID
+    networks:
+      - home-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/11434"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+
+
+networks:
+  home-network:
+    driver: bridge
+
+volumes:
+  ollama_data:

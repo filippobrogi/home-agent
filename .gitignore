@@ -1,0 +1,31 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.env
+.venv
+venv/
+
+# Database
+qdrant_storage/
+*.db
+
+# backups
+backups/
+
+# data
+data/
+prompts/
+
+# imgs
+imgs/
+*.jpg
+*.png
+
+# vscode
+.vscode/
