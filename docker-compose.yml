@@ -34,7 +34,7 @@ services:
         wait $$OLLAMA_PID
     networks:
       - home-network
-    restart: unless-stopped
+    restart: always
     healthcheck:
       test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/11434"]
       interval: 30s
