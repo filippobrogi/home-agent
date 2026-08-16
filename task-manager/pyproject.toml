@@ -1,0 +1,44 @@
+[project]
+name = "task-manager"
+version = "0.1.0"
+description = "Home Task Manager"
+readme = "README.md"
+authors = [
+    { name = "Filippo Brogi", email = "filippo.brogi@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi[standard]>=0.141.1",
+    "pydantic>=2.13.4",
+    "uvicorn[standard]>=0.52.3",
+]
+
+[project.scripts]
+task-manager = "task_manager.main:app"
+
+
+[build-system]
+requires = ["uv_build>=0.12.3,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.6.2",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "ruff>=0.16.3",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+
+ignore = [
+    "E501",
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["task_manager"]

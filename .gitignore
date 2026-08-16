@@ -29,3 +29,6 @@ imgs/
 
 # vscode
 .vscode/
+
+# log files
+*.log

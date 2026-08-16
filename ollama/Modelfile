@@ -5,8 +5,8 @@ PARAMETER num_ctx 4096
 PARAMETER num_predict 2048
 
 # Deterministic JSON output
-PARAMETER temperature 0.1
-PARAMETER top_p 0.7
+PARAMETER temperature 0.0
+PARAMETER top_p 0.8
 
 # avoid repetitive json
 PARAMETER repeat_penalty 1.15
