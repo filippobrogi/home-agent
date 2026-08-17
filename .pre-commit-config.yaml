@@ -13,7 +13,7 @@ repos:
       - id: ruff-format
   # Pytest
   - repo: local
-    hooks:
+    hooks:  
       - id: tests
         name: run tests
         entry: pytest -v tests/

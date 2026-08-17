@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 from task_manager.models import PrimaryKey
 from task_manager.task.models import Task, TaskPriority
@@ -13,13 +14,18 @@ class InMemoryTaskRepository(TaskRepository):
         self._next_id: PrimaryKey = 1
 
     async def create_task(
-        self, title: str, description: str, priority: TaskPriority = TaskPriority.MEDIUM
+        self,
+        title: str,
+        description: str,
+        due_date: datetime,
+        priority: TaskPriority = TaskPriority.MEDIUM,
     ) -> Task:
         """Create a new task with the given title, description, and priority.
 
         Args:
             title (str): the title of the task
             description (str): the detailed description of the task
+            due_date (datetime): the due date of the task
             priority (TaskPriority, optional): the priority of the task. Defaults to TaskPriority.MEDIUM.
 
         Returns:
@@ -31,6 +37,7 @@ class InMemoryTaskRepository(TaskRepository):
             "description": description,
             "priority": priority,
             "completed": False,
+            "due_date": due_date,
         }
         new_task = Task(**task)
         self._tasks[self._next_id] = new_task
