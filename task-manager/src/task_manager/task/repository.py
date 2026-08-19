@@ -14,12 +14,21 @@ class TaskRepository(ABC):
         title: str,
         description: str,
         priority: TaskPriority = TaskPriority.MEDIUM,
+        duration: int = 60,
         due_date: datetime | None = None,
     ) -> Task:
         raise NotImplementedError
 
     @abstractmethod
-    async def get_task(self, task_id: PrimaryKey) -> Task | None:
+    async def get_task_by_id(self, task_id: PrimaryKey) -> Task | None:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_task_by_title(self, title: str) -> Task | None:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_overdue_tasks(self) -> list[Task]:
         raise NotImplementedError
 
     @abstractmethod
@@ -33,9 +42,13 @@ class TaskRepository(ABC):
         title: str | None = None,
         description: str | None = None,
         priority: TaskPriority | None = None,
-        completed: bool | None = None,
+        duration: int = 60,
         due_date: datetime | None = None,
     ) -> Task | None:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def complete_task(self, task_id: PrimaryKey) -> bool:
         raise NotImplementedError
 
     @abstractmethod

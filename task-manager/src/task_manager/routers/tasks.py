@@ -6,7 +6,7 @@ from pydantic import ValidationError
 from typing_extensions import Annotated
 
 from task_manager.task.factory import get_task_repository
-from task_manager.task.models import Task
+from task_manager.task.models import Task, UpdateTask
 from task_manager.task.repository import TaskRepository
 
 router = APIRouter()
@@ -37,11 +37,40 @@ async def create_task(
     "/tasks/{task_id}", response_model=Task, responses={404: {"description": "Task not found"}}
 )
 async def update_task(
-    task_id: int, repository: Annotated[TaskRepository, Depends(get_task_repository)]
+    task_id: int,
+    update_data: UpdateTask,
+    repository: Annotated[TaskRepository, Depends(get_task_repository)],
 ):
     # Implementation for updating a task
-    if task_id is None:
-        raise HTTPException(status_code=400, detail="Task ID is required")
+    task = await repository.update_task(task_id, **update_data.dict(exclude_unset=True))
+    if not task:
+        raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
 
-    task = await repository.get_task(task_id)
+
+@router.post(
+    "/tasks/{task_id}/complete",
+    response_model=Task,
+    responses={404: {"description": "Task not found"}},
+)
+async def complete_task(
+    task_id: int, repository: Annotated[TaskRepository, Depends(get_task_repository)]
+):
+    # Implementation for completing a task
+    if not await repository.complete_task(task_id):
+        raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
+
+
+@router.get(
+    "/tasks/{task_title}", response_model=Task, responses={404: {"description": "Task not found"}}
+)
+async def get_task(
+    task_title: str, repository: Annotated[TaskRepository, Depends(get_task_repository)]
+):
+    # Implementation for retrieving a task
+    if task_title is None:
+        raise HTTPException(status_code=400, detail="Task title is required")
+
+    task = await repository.get_task_by_title(task_title)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
     return {"task": task}

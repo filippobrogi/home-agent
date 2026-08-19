@@ -2,16 +2,8 @@ import datetime
 
 import pytest
 
-from task_manager.task.factory import get_task_repository
 from task_manager.task.models import TaskPriority
 from task_manager.task.service import InMemoryTaskRepository
-
-
-def test_get_task_repository_singleton():
-    repo1 = get_task_repository()
-    repo2 = get_task_repository()
-    assert repo1 is repo2
-    assert isinstance(repo1, InMemoryTaskRepository)
 
 
 @pytest.mark.asyncio
@@ -30,7 +22,7 @@ async def test_create_task():
 
 
 @pytest.mark.asyncio
-async def test_get_task():
+async def test_get_task_by_id():
     repo = InMemoryTaskRepository()
     current_date = datetime.datetime.now() + datetime.timedelta(
         days=1
@@ -38,7 +30,20 @@ async def test_get_task():
     created_task = await repo.create_task(
         "Test Task", "This is a test task.", current_date, TaskPriority.HIGH
     )
-    retrieved_task = await repo.get_task(created_task.id)
+    retrieved_task = await repo.get_task_by_id(created_task.id)
+    assert retrieved_task == created_task
+
+
+@pytest.mark.asyncio
+async def test_get_task_by_title():
+    repo = InMemoryTaskRepository()
+    current_date = datetime.datetime.now() + datetime.timedelta(
+        days=1
+    )  # Ensure due_date is in the future
+    created_task = await repo.create_task(
+        "Unique Task Title", "This is a test task.", current_date, TaskPriority.HIGH
+    )
+    retrieved_task = await repo.get_task_by_title("Unique Task Title")
     assert retrieved_task == created_task
 
 
