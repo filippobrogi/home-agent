@@ -12,20 +12,29 @@ from task_manager.task.repository import TaskRepository
 router = APIRouter()
 
 
-@router.get("/tasks")
-async def get_tasks(repository: Annotated[TaskRepository, Depends(get_task_repository)]):
-    tasks = await repository.get_all_tasks()
+@router.get("/tasks", description="Retrieve all tasks", response_model=dict)
+async def get_tasks(
+    repository: Annotated[TaskRepository, Depends(get_task_repository)], overdue: bool = False
+):
+    if overdue:
+        tasks = await repository.get_overdue_tasks()
+    else:
+        tasks = await repository.get_all_tasks()
     return {"tasks": tasks}
 
 
-@router.post("/tasks", responses={400: {"description": "Invalid data"}})
+@router.post(
+    "/tasks",
+    description="Create a new task",
+    response_model=Task,
+    responses={400: {"description": "Invalid data"}},
+)
 async def create_task(
     repository: Annotated[TaskRepository, Depends(get_task_repository)],
     title: str,
     description: str,
     due_date: datetime,
 ):
-    # Implementation for creating a task
     try:
         task = await repository.create_task(title=title, description=description, due_date=due_date)
         return {"task": task}
@@ -34,7 +43,10 @@ async def create_task(
 
 
 @router.patch(
-    "/tasks/{task_id}", response_model=Task, responses={404: {"description": "Task not found"}}
+    "/tasks/{task_id}",
+    description="Update an existing task",
+    response_model=Task,
+    responses={404: {"description": "Task not found"}},
 )
 async def update_task(
     task_id: int,
@@ -49,7 +61,8 @@ async def update_task(
 
 @router.post(
     "/tasks/{task_id}/complete",
-    response_model=Task,
+    description="Mark a task as completed",
+    response_model=dict,
     responses={404: {"description": "Task not found"}},
 )
 async def complete_task(
@@ -58,10 +71,14 @@ async def complete_task(
     # Implementation for completing a task
     if not await repository.complete_task(task_id):
         raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
+    return {"message": f"Task {task_id} marked as completed"}
 
 
 @router.get(
-    "/tasks/{task_title}", response_model=Task, responses={404: {"description": "Task not found"}}
+    "/tasks/{task_title}",
+    description="Retrieve a task by title",
+    response_model=Task,
+    responses={404: {"description": "Task not found"}},
 )
 async def get_task(
     task_title: str, repository: Annotated[TaskRepository, Depends(get_task_repository)]
@@ -74,3 +91,19 @@ async def get_task(
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
     return {"task": task}
+
+
+@router.delete(
+    "/tasks/{task_id}",
+    description="Delete a task",
+    response_model=dict,
+    responses={404: {"description": "Task not found"}},
+)
+async def delete_task(
+    task_id: int, repository: Annotated[TaskRepository, Depends(get_task_repository)]
+):
+    # Implementation for deleting a task
+    if not await repository.delete_task(task_id):
+        raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
+
+    return {"message": f"Task {task_id} deleted successfully"}

@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
 from task_manager.models import PrimaryKey
 from task_manager.task.models import Task, TaskPriority
@@ -12,6 +12,10 @@ class InMemoryTaskRepository(TaskRepository):
     def __init__(self):
         self._tasks: dict[PrimaryKey, Task] = {}
         self._next_id: PrimaryKey = 1
+
+    def _current_datetime(self) -> datetime:
+        """Returns the current datetime in UTC."""
+        return datetime.now(timezone.utc)
 
     async def create_task(
         self,
@@ -61,7 +65,7 @@ class InMemoryTaskRepository(TaskRepository):
 
     async def get_overdue_tasks(self) -> list[Task]:
         """Retrieve all overdue tasks."""
-        now = datetime.now()
+        now = self._current_datetime()
         return [task for task in self._tasks.values() if task.due_date < now and not task.completed]
 
     async def update_task(
@@ -70,6 +74,7 @@ class InMemoryTaskRepository(TaskRepository):
         title: str | None = None,
         description: str | None = None,
         priority: TaskPriority | None = None,
+        due_date: datetime | None = None,
     ) -> Task | None:
         """Update a task with the given ID.
 
@@ -78,6 +83,7 @@ class InMemoryTaskRepository(TaskRepository):
             title (str | None, optional): The new title for the task. Defaults to None.
             description (str | None, optional): The new description for the task. Defaults to None.
             priority (str | None, optional): The new priority for the task. Defaults to None.
+            due_date (datetime | None, optional): The new due date for the task. Defaults to None.
 
         Returns:
             Task | None: The updated task, or None if the task was not found.
@@ -93,6 +99,8 @@ class InMemoryTaskRepository(TaskRepository):
             task.description = description
         if priority is not None:
             task.priority = priority
+        if due_date is not None:
+            task.due_date = due_date
         self._tasks[task_id] = task
         return task
 
